@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAL-OPS: Malware Analysis Workbench</title>
+  <meta name="description" content="Step-by-step malware analysis process reference with an interactive workbench: phase checklist, IOC worksheet, command cheat sheet, YARA/Sigma rule builder, ATT&CK tagger, and report generator." />
+  <link rel="canonical" href="https://h3ad-sec.github.io/MAL-OPS/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="H3AD-SEC" />
+  <meta property="og:url" content="https://h3ad-sec.github.io/MAL-OPS/" />
+  <meta property="og:title" content="MAL-OPS: Malware Analysis Workbench" />
+  <meta property="og:description" content="Step-by-step malware analysis process reference with an interactive workbench: phase checklist, IOC worksheet, command cheat sheet, YARA/Sigma rule builder, ATT&CK tagger, and report generator." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MAL-OPS: Malware Analysis Workbench" />
+  <meta name="twitter:description" content="Step-by-step malware analysis process reference with an interactive workbench: phase checklist, IOC worksheet, command cheat sheet, YARA/Sigma rule builder, ATT&CK tagger, and report generator." />
+  <meta name="twitter:image" content="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" />
+
+  <meta name="theme-color" content="#080c14" />
+  <link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Share+Tech+Mono&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "MAL-OPS",
+    "description": "Step-by-step malware analysis process reference with an interactive workbench: phase checklist, IOC worksheet, command cheat sheet, YARA/Sigma rule builder, ATT&CK tagger, and report generator.",
+    "url": "https://h3ad-sec.github.io/MAL-OPS/",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "publisher": { "@type": "Organization", "name": "H3AD-SEC", "url": "https://h3ad-sec.github.io" }
+  }
+  </script>
+<style>
+:root{
+  --bg:#080c14;--panel:#0d1117;--panel-alt:#111827;--surface:#18253a;--surface-highlight:#1e293b;
+  --text:#e6edf3;--text-dim:#96b0cc;--muted:#8b949e;--dim:#7c8aa5;--muted-dim:#3a5470;
+  --accent:#00d4ff;--primary:#00d4ff;--accent2:#58a6ff;--yellow:#f59e0b;--red:#ff3b5c;
+  --border:#1e2d3d;--border-strong:#24384c;--border-soft:#16212e;--border-dim:#16212e;
+  --status-live:#00d4ff;--status-partial:#f59e0b;--status-soon:#2d3748;
+  --nav-h:48px;
+  --mono:'Share Tech Mono',monospace;--ui:'IBM Plex Sans',sans-serif;--font-cond:'Share Tech Mono',monospace;--fs-xs:11px;
+  --radius-lg:10px;--shadow-sm:0 1px 2px rgba(0,0,0,.35);--ease:cubic-bezier(.2,.7,.3,1);
+}
+body.light{
+  --bg:#f8fafc;--panel:#ffffff;--panel-alt:#f1f5f9;--surface:#e7ecf3;--surface-highlight:#dbe4f0;
+  --text:#0d1117;--text-dim:#33445c;--muted:#5c6b8a;--dim:#5f7189;--muted-dim:#5c7a9a;
+  --accent:#0284c7;--primary:#0284c7;--accent2:#2563a8;
+  --border:#e2e8f0;--border-strong:#c8d4e4;--border-soft:#edf1f6;--border-dim:#c8d8ec;
+  --status-live:#0284c7;--status-partial:#d97706;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:3px;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size:14px;line-height:1.6;
+  min-height:100dvh;transition:background .25s,color .25s;overflow-x:hidden;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 45% at 50% 0%,rgba(0,212,255,.055) 0%,transparent 100%),
+             radial-gradient(ellipse 50% 35% at 5% 100%,rgba(0,212,255,.04) 0%,transparent 100%);}
+body.light::before{background:radial-gradient(ellipse 80% 45% at 50% 0%,rgba(2,132,199,.05) 0%,transparent 100%),
+             radial-gradient(ellipse 50% 35% at 5% 100%,rgba(37,99,235,.03) 0%,transparent 100%);}
+a{color:var(--accent);text-decoration:none;}
+a:hover{opacity:.8;}
+* { scrollbar-width:thin; scrollbar-color:var(--border-strong) transparent; }
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:20px;border:2px solid transparent;background-clip:content-box;}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--panel);border-bottom:1px solid var(--border);
+  height:var(--nav-h);display:flex;align-items:center;padding:0 1.25rem;transition:background .3s,border-color .3s;}
+.nav-brand{display:flex;align-items:center;flex-shrink:0;margin-right:1rem;}
+.nav-brand img{height:22px;width:auto;vertical-align:middle;}
+.xv-nav-pill{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin-left:0;padding-left:10px;
+  border-left:1px solid var(--border);white-space:nowrap;flex-shrink:0;text-decoration:none;}
+.xv-pill-name{font-family:'Exo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:3px;line-height:1;}
+.xv-pill-accent{color:var(--accent);}
+.xv-pill-text{color:var(--text);}
+.xv-pill-tagline{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1.5px;}
+.nav-links{display:none!important;}
+.nav-links a{font-family:'Exo 2',sans-serif;font-weight:500;font-size:var(--fs-xs);color:var(--muted);text-decoration:none;padding:5px 8px;
+  border-radius:4px;border:1px solid transparent;white-space:nowrap;transition:all .15s;}
+.nav-links a:hover{color:var(--accent);border-color:var(--border);background:rgba(0,212,255,.04);}
+.nav-links a.nav-current{color:var(--accent);border:1px solid var(--border);}
+.nav-right{margin-left:auto;flex-shrink:0;padding-left:1rem;}
+.theme-toggle{cursor:pointer;}
+.toggle-track{width:44px;height:22px;background:var(--border);border-radius:50px;position:relative;}
+.toggle-thumb{width:16px;height:16px;background:var(--accent);border-radius:50%;position:absolute;top:3px;left:3px;
+  transition:transform .3s;box-shadow:0 0 6px var(--accent);}
+body.light .toggle-thumb{transform:translateX(22px);}
+.hamburger{display:flex;flex-direction:column;justify-content:center;gap:4px;cursor:pointer;padding:6px;margin-right:8px;flex-shrink:0;}
+.hamburger span{display:block;width:20px;height:2px;background:var(--muted);border-radius:2px;}
+.nav-drawer{display:none;position:fixed;top:var(--nav-h);left:0;right:0;background:var(--panel);border-bottom:1px solid var(--border);
+  z-index:99;padding:.75rem 1.25rem 1rem;flex-direction:column;gap:2px;max-height:calc(100vh - var(--nav-h));overflow-y:auto;}
+.nav-drawer.open{display:flex;}
+.nav-drawer a{font-family:var(--ui);font-size:13px;color:var(--text-dim);text-decoration:none;padding:8px 10px;
+  border-radius:4px;border-left:2px solid transparent;transition:.15s;}
+.nav-drawer a:hover{color:var(--accent);border-left-color:var(--accent);background:rgba(0,212,255,.04);}
+.nav-drawer a.nav-current{color:var(--accent);}
+.drawer-sub{padding-left:1.8rem !important;font-size:11px !important;opacity:.8;}
+@media(max-width:380px){.xv-pill-tagline{display:none;}.nav-brand{margin-right:.5rem;}.nav{padding:0 .75rem;}.nav-right{padding-left:.5rem;}}
+
+/* ── App shell ── */
+.mo-app{position:relative;z-index:1;padding-top:var(--nav-h);min-height:100dvh;min-width:0;display:flex;flex-direction:column;font-family:var(--ui);flex:1 0 auto;}
+
+/* ── Toolbar ── */
+.mo-toolbar{position:sticky;top:var(--nav-h);z-index:40;display:flex;align-items:center;gap:14px;height:52px;padding:0 20px;
+  background:linear-gradient(180deg,var(--panel-alt) 0%,var(--panel) 100%);border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm);flex-shrink:0;flex-wrap:wrap;}
+.mo-view-toggle{display:flex;flex-shrink:0;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:2px;gap:2px;}
+.mo-view-btn{font-family:var(--font-cond);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:7px 12px;border:none;border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;transition:.14s;}
+.mo-view-btn:hover{color:var(--text);}
+.mo-view-btn.active{background:var(--accent);color:#04101c;}
+.mo-progress{margin-left:auto;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.mo-progress-bar{width:120px;height:6px;border-radius:4px;background:var(--border);overflow:hidden;}
+.mo-progress-fill{height:100%;background:var(--accent);transition:width .25s;}
+@media(max-width:680px){.mo-toolbar{height:auto;padding:8px 14px;row-gap:8px;}.mo-progress{margin-left:0;width:100%;order:3;}}
+
+/* ── Intro strip ── */
+.mo-intro{padding:12px 20px;border-bottom:1px solid var(--border-soft);background:var(--panel-alt);
+  font-size:12.5px;color:var(--muted);line-height:1.55;max-width:120ch;flex-shrink:0;}
+.mo-intro b{color:var(--text-dim);}
+
+/* ── Card grid (guide) ── */
+.mo-card-scroll{flex:1;overflow:auto;min-height:0;padding:16px 20px 32px;}
+.mo-card-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}
+@media(max-width:1200px){.mo-card-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:860px){.mo-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:480px){.mo-card-grid{grid-template-columns:1fr;}}
+.mo-card{position:relative;background:linear-gradient(155deg, color-mix(in srgb, var(--row-color,var(--accent)) 20%, var(--panel)) 0%, var(--panel) 56%);
+  border:1px solid var(--border-soft);border-top:4px solid var(--row-color,var(--accent));border-radius:9px;
+  padding:14px 16px;cursor:pointer;text-align:left;font-family:var(--ui);display:flex;flex-direction:column;
+  gap:10px;min-width:0;transition:background .18s,border-color .18s,box-shadow .18s,transform .14s;}
+.mo-card:hover{border-color:var(--border-strong);transform:translateY(-2px);
+  box-shadow:0 8px 20px -6px color-mix(in srgb, var(--row-color,var(--accent)) 45%, transparent), 0 4px 10px rgba(0,0,0,.18);}
+.mo-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.mo-card-num{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--row-color,var(--accent));letter-spacing:.1em;}
+.mo-card-name{font-family:var(--mono);font-weight:700;font-size:14.5px;color:var(--text);}
+.mo-card-desc{font-size:12.5px;font-weight:400;color:var(--muted);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mo-card-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:2px;}
+.mo-cat-pill{display:inline-flex;align-items:center;font-family:var(--font-cond);font-size:9.5px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;border-radius:4px;padding:3px 8px;}
+.mo-card-progress{font-family:var(--mono);font-size:10.5px;color:var(--dim);white-space:nowrap;background:var(--surface);
+  border:1px solid var(--border);border-radius:12px;padding:3px 9px;}
+
+/* ── Inspector (slide-in drawer) ── */
+.mo-inspector-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;}
+.mo-inspector-backdrop.open{opacity:1;pointer-events:auto;}
+.mo-inspector{position:fixed;top:var(--nav-h);right:0;bottom:0;width:min(660px,100vw);background:var(--panel-alt);
+  border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .25s var(--ease);box-shadow:-10px 0 34px rgba(0,0,0,.28);}
+.mo-inspector.open{transform:translateX(0);}
+.mo-inspector-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border-soft);
+  flex-shrink:0;background:var(--panel);}
+.mo-inspector-close{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);
+  width:28px;height:28px;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:auto;}
+.mo-inspector-close:hover{color:var(--text);border-color:var(--dim);}
+.mo-inspector-scroll{flex:1;overflow-y:auto;min-height:0;padding:24px 28px 48px;}
+.mo-inspector-inner{animation:moFadeIn .2s var(--ease);}
+@keyframes moFadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+@media(prefers-reduced-motion:reduce){.mo-inspector-inner{animation:none;}.mo-inspector{transition:none;}}
+@media(max-width:680px){.mo-inspector{width:100vw;}.mo-inspector-scroll{padding:20px 16px 40px;}}
+
+.mo-d-title{font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.3;margin-bottom:6px;font-family:var(--mono);}
+.mo-d-eyebrow{font-family:var(--font-cond);font-size:11px;letter-spacing:.15em;font-weight:600;text-transform:uppercase;margin-bottom:10px;}
+.mo-d-desc{color:var(--muted);font-size:13.5px;line-height:1.62;margin-bottom:20px;}
+.mo-checklist{display:flex;flex-direction:column;gap:2px;}
+.mo-check-item{display:flex;align-items:flex-start;gap:10px;padding:9px 4px;border-top:1px solid var(--border-soft);cursor:pointer;}
+.mo-check-item:first-child{border-top:none;}
+.mo-check-item input{margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:var(--accent);cursor:pointer;}
+.mo-check-item span{font-size:13px;color:var(--text-dim);line-height:1.5;}
+.mo-check-item.done span{color:var(--dim);text-decoration:line-through;}
+
+/* ── Section titles ── */
+.mo-section-title{font-family:var(--ui);font-weight:600;font-size:11px;letter-spacing:2px;
+  color:var(--accent);text-transform:uppercase;margin:0 0 12px;padding-left:10px;
+  border-left:2px solid var(--accent);}
+
+/* ── Workbench ── */
+.mo-wb{flex:1;overflow:auto;min-height:0;padding:16px 20px 40px;}
+.mo-wb-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.mo-wb-tab{font-family:var(--font-cond);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:8px 14px;border:1px solid var(--border);border-radius:20px;color:var(--muted);background:var(--panel);cursor:pointer;transition:.14s;}
+.mo-wb-tab:hover{color:var(--text);border-color:var(--dim);}
+.mo-wb-tab.active{color:#04101c;background:var(--accent);border-color:var(--accent);}
+.mo-wb-panel{display:none;}
+.mo-wb-panel.active{display:block;animation:moFadeIn .2s var(--ease);}
+.mo-panel-box{border:1px solid var(--border);border-radius:9px;background:var(--panel-alt);padding:18px 20px;margin-bottom:16px;}
+.mo-panel-note{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:14px;max-width:90ch;}
+
+/* Forms */
+.mo-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.mo-field label{font-family:var(--font-cond);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);}
+.mo-field input[type=text],.mo-field input[type=search],.mo-field select,.mo-field textarea{
+  width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:var(--ui);font-size:13px;outline:none;transition:.14s;}
+.mo-field input:focus,.mo-field select:focus,.mo-field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.1);}
+.mo-field textarea{font-family:var(--mono);resize:vertical;min-height:90px;line-height:1.6;}
+.mo-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.mo-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:700px){.mo-row2,.mo-row3{grid-template-columns:1fr;}}
+.mo-btn{font-family:var(--font-cond);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:9px 16px;border:1px solid var(--border);border-radius:6px;color:var(--muted);background:var(--panel);cursor:pointer;transition:.14s;}
+.mo-btn:hover{color:var(--text);border-color:var(--dim);}
+.mo-btn-primary{background:var(--accent);color:#04101c;border-color:var(--accent);}
+.mo-btn-primary:hover{opacity:.88;color:#04101c;}
+.mo-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+
+/* IOC table */
+.mo-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:14px;}
+.mo-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.mo-table th{text-align:left;font-family:var(--font-cond);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--dim);background:var(--surface);padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.mo-table td{padding:6px 8px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+.mo-table tr:last-child td{border-bottom:none;}
+.mo-table input,.mo-table select{width:100%;padding:6px 8px;background:var(--bg);border:1px solid var(--border);
+  border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;}
+.mo-icon-btn{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);
+  width:26px;height:26px;cursor:pointer;font-size:13px;line-height:1;}
+.mo-icon-btn:hover{color:var(--red);border-color:var(--red);}
+
+/* Cheat sheet */
+.mo-cheat-group{margin-bottom:20px;}
+.mo-cheat-cmd{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);
+  border-radius:7px;padding:9px 12px;margin-bottom:8px;}
+.mo-cheat-cmd code{flex:1;font-family:var(--mono);font-size:12.5px;color:var(--text-dim);overflow-x:auto;white-space:pre;}
+.mo-cheat-cmd button{flex-shrink:0;}
+.mo-cheat-label{font-size:11.5px;color:var(--muted);margin-bottom:3px;}
+
+/* Code output box */
+.mo-code{position:relative;border:1px solid var(--border);border-radius:9px;background:var(--panel);overflow:hidden;margin-top:12px;}
+.mo-code-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border-soft);background:var(--surface);}
+.mo-code-bar .lbl{font-family:var(--mono);font-size:10.5px;color:var(--dim);letter-spacing:.05em;}
+.mo-code-bar .mo-btn-row{margin:0 0 0 auto;}
+.mo-code pre{padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.7;margin:0;color:var(--text-dim);white-space:pre;max-height:360px;}
+
+/* ATT&CK tagger */
+.mo-attck-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:16px;}
+@media(max-width:800px){.mo-attck-grid{grid-template-columns:1fr;}}
+.mo-attck-item{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border:1px solid var(--border-soft);border-radius:6px;background:var(--bg);}
+.mo-attck-item input{margin-top:3px;accent-color:var(--accent);cursor:pointer;}
+.mo-attck-item .id{font-family:var(--mono);font-size:11.5px;color:var(--accent2);font-weight:700;}
+.mo-attck-item .nm{font-size:12px;color:var(--text-dim);}
+.mo-attck-item .tac{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;}
+.mo-tag-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--accent2);
+  background:color-mix(in srgb, var(--accent2) 10%, transparent);border:1px solid color-mix(in srgb, var(--accent2) 25%, transparent);
+  border-radius:20px;padding:4px 10px 4px 12px;margin:0 6px 6px 0;}
+.mo-tag-chip button{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;line-height:1;}
+
+/* Pivot */
+.mo-pivot-out{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* Toast */
+.mo-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel);
+  border:1px solid var(--accent);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 18px;border-radius:20px;
+  z-index:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 6px 20px rgba(0,0,0,.3);}
+.mo-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── Footer ── */
+.tracer-footer{flex-shrink:0;border-top:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:.5rem 1.5rem;font-family:var(--ui);font-size:var(--fs-xs);
+  color:var(--muted);letter-spacing:.03em;}
+.footer-left{color:var(--muted);}
+.footer-right{color:var(--muted);text-transform:uppercase;opacity:.85;}
+.footer-credit-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.footer-credit-pill{display:inline-flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:4px 12px;border:1px solid var(--border);
+  border-radius:999px;text-decoration:none;font-family:'Exo 2',sans-serif;font-weight:500;font-size:var(--fs-xs);
+  white-space:nowrap;transition:border-color .15s;}
+.footer-credit-pill:hover{border-color:var(--accent);}
+.footer-credit-pill .credit-tool{font-weight:700;letter-spacing:2px;}
+.footer-credit-pill .credit-by{color:var(--muted);}
+.footer-credit-pill .credit-name{color:var(--accent);font-weight:700;letter-spacing:.5px;}
+@media(max-width:860px){.tracer-footer{flex-direction:column;justify-content:center;text-align:center;gap:.6rem;}.footer-credit-row{justify-content:center;}}
+body.light .footer-left,body.light .footer-right,body.light .footer-credit-pill .credit-by{color:#2E343B;}
+body.light .footer-credit-pill .credit-name{color:#0A6EA8;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="hamburger" id="hamburger" onclick="toggleDrawer()" role="button" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </div>
+  <a class="nav-brand" href="https://h3ad-sec.github.io">
+    <img id="navLogo" src="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" alt="H3AD-SEC" />
+  </a>
+  <a class="xv-nav-pill" id="xv-nav-pill" href="https://h3ad-sec.github.io/MAL-OPS/" style="text-decoration:none">
+    <span class="xv-pill-name"><span class="xv-pill-accent">MAL</span><span class="xv-pill-text">-OPS</span></span>
+    <span class="xv-pill-tagline">From Detonation to Detection.</span>
+  </a>
+  <div class="nav-links"></div>
+  <div class="nav-right">
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" role="button" aria-label="Toggle theme">
+      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+    </div>
+  </div>
+</nav>
+
+<div class="nav-drawer" id="navDrawer">
+  <a href="https://h3ad-sec.github.io/H3AD/" onclick="closeDrawer()">H3AD</a>
+  <a href="https://h3ad-sec.github.io/H3AD-X/" onclick="closeDrawer()">H3AD-X</a>
+  <a href="https://h3ad-sec.github.io/IOC-VERDIKT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ IOC-VERDIKT ↗</a>
+  <a href="https://h3ad-sec.github.io/PARSE-X/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PARSE-X ↗</a>
+  <a href="https://h3ad-sec.github.io/DNSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ DNSCOPE ↗</a>
+  <a href="https://h3ad-sec.github.io/X-VERDIKT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ X-VERDIKT ↗</a>
+  <a href="https://h3ad-sec.github.io/MAILSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ MAILSCOPE ↗</a>
+  <a href="https://h3ad-sec.github.io/INFRA-SCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ INFRA-SCOPE ↗</a>
+  <a href="https://h3ad-sec.github.io/H3AD-AI/" onclick="closeDrawer()">H3AD-AI</a>
+  <a href="https://h3ad-sec.github.io/PROMPTVAULT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PROMPTVAULT ↗</a>
+  <a href="https://h3ad-sec.github.io/H3AD-DETECT/" onclick="closeDrawer()">H3AD-DETECT</a>
+  <a href="https://h3ad-sec.github.io/TRACERULES/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ TRACERULES ↗</a>
+  <a href="https://h3ad-sec.github.io/H3AD-HUNT/" onclick="closeDrawer()">H3AD-HUNT</a>
+  <a href="https://h3ad-sec.github.io/HYPOS/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ HYPOS ↗</a>
+  <a href="https://h3ad-sec.github.io/PIVEX/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PIVEX ↗</a>
+  <a href="https://h3ad-sec.github.io/TRACEPULSE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ TRACEPULSE ↗</a>
+  <a href="https://h3ad-sec.github.io/LOLBIN-R/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ LOLBIN-R ↗</a>
+  <a href="https://h3ad-sec.github.io/TTPHUNT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ TTPHUNT ↗</a>
+  <a href="https://h3ad-sec.github.io/ADPATH/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ ADPATH ↗</a>
+  <a href="https://h3ad-sec.github.io/H3AD-OPS/" onclick="closeDrawer()">H3AD-OPS</a>
+  <a href="https://h3ad-sec.github.io/QUICKTRACE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ QUICKTRACE ↗</a>
+  <a href="https://h3ad-sec.github.io/PHISHOPS/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PHISHOPS ↗</a>
+  <a href="https://h3ad-sec.github.io/H3AD-DF/" onclick="closeDrawer()">H3AD-DF</a>
+  <a href="https://h3ad-sec.github.io/ARTIFEKTX/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ ARTIFEKTX ↗</a>
+  <a href="https://h3ad-sec.github.io/CHRONIFY/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ CHRONIFY ↗</a>
+  <a href="https://h3ad-sec.github.io/WIN-EVT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ WIN-EVT ↗</a>
+  <a href="https://h3ad-sec.github.io/MAL-OPS/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub nav-current">↳ MAL-OPS ↗</a>
+  <a href="https://h3ad-sec.github.io/H3AD-IR/" onclick="closeDrawer()">H3AD-IR</a>
+  <a href="https://h3ad-sec.github.io/H3AD-LEARN/" onclick="closeDrawer()">H3AD-LEARN</a>
+  <a href="https://h3ad-sec.github.io/H3AD-LEARN/malware-analysis/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ MALWARE ANALYSIS ↗</a>
+  <a href="mailto:h3adsec@gmail.com" onclick="closeDrawer()">CONTACT</a>
+</div>
+
+<div class="mo-app">
+  <div class="mo-toolbar">
+    <div class="mo-view-toggle" role="tablist" aria-label="View">
+      <button class="mo-view-btn active" id="viewBtnGuide" role="tab" aria-selected="true" onclick="setView('guide')">PROCESS GUIDE</button>
+      <button class="mo-view-btn" id="viewBtnWb" role="tab" aria-selected="false" onclick="setView('workbench')">WORKBENCH</button>
+    </div>
+    <div class="mo-progress" id="progressWrap">
+      <span id="progressLabel">0 / 0 STEPS</span>
+      <div class="mo-progress-bar"><div class="mo-progress-fill" id="progressFill" style="width:0%"></div></div>
+      <button class="mo-btn" onclick="resetChecklist()" title="Reset checklist" style="padding:4px 10px;">RESET</button>
+    </div>
+  </div>
+
+  <div class="mo-intro" id="guideIntro">
+    <b>Seventeen phases, lab setup through legal handoff.</b> Click any phase to open its checklist. Progress is saved in this browser only — nothing here leaves your machine. Full write-up with tables and rationale lives in <a href="https://github.com/h3ad-sec/MAL-OPS/blob/main/malware-analysis-process.md" target="_blank" rel="noopener">malware-analysis-process.md</a>.
+  </div>
+
+  <div class="mo-card-scroll" id="guideView">
+    <div class="mo-card-grid" id="cardGrid"></div>
+  </div>
+
+  <div class="mo-wb" id="wbView" hidden>
+    <div class="mo-wb-tabs" role="tablist">
+      <button class="mo-wb-tab active" data-panel="iocs" onclick="setWbTab('iocs')">IOC WORKSHEET</button>
+      <button class="mo-wb-tab" data-panel="cheat" onclick="setWbTab('cheat')">CHEAT SHEET</button>
+      <button class="mo-wb-tab" data-panel="rules" onclick="setWbTab('rules')">RULE BUILDER</button>
+      <button class="mo-wb-tab" data-panel="attck" onclick="setWbTab('attck')">ATT&amp;CK TAGGER</button>
+      <button class="mo-wb-tab" data-panel="report" onclick="setWbTab('report')">REPORT</button>
+      <button class="mo-wb-tab" data-panel="pivot" onclick="setWbTab('pivot')">PIVOTS</button>
+    </div>
+
+    <!-- IOC WORKSHEET -->
+    <div class="mo-wb-panel active" id="panel-iocs">
+      <div class="mo-panel-box">
+        <div class="mo-section-title">IOC Worksheet</div>
+        <p class="mo-panel-note">Track every indicator found across the analysis. Saved to this browser (localStorage) as you go — nothing is sent anywhere. Export when the report is ready.</p>
+        <div class="mo-table-wrap">
+          <table class="mo-table">
+            <thead><tr><th style="width:150px">Type</th><th>Value</th><th>Notes</th><th style="width:36px"></th></tr></thead>
+            <tbody id="iocRows"></tbody>
+          </table>
+        </div>
+        <div class="mo-btn-row">
+          <button class="mo-btn" onclick="addIocRow()">+ ADD ROW</button>
+          <button class="mo-btn mo-btn-primary" onclick="exportIocsCsv()">EXPORT CSV</button>
+          <button class="mo-btn" onclick="exportIocsStix()">EXPORT STIX 2.1</button>
+          <button class="mo-btn" onclick="clearIocs()">CLEAR ALL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHEAT SHEET -->
+    <div class="mo-wb-panel" id="panel-cheat">
+      <div class="mo-panel-box">
+        <div class="mo-section-title">Command Cheat Sheet</div>
+        <p class="mo-panel-note">One-line reference commands per phase. Click COPY to grab any of them.</p>
+        <div id="cheatSheetOut"></div>
+      </div>
+    </div>
+
+    <!-- RULE BUILDER -->
+    <div class="mo-wb-panel" id="panel-rules">
+      <div class="mo-panel-box">
+        <div class="mo-section-title">YARA Rule Builder</div>
+        <div class="mo-row3">
+          <div class="mo-field"><label>Rule name</label><input type="text" id="yaraName" placeholder="Sample_Family_Dropper" /></div>
+          <div class="mo-field"><label>Author</label><input type="text" id="yaraAuthor" placeholder="analyst name" /></div>
+          <div class="mo-field"><label>Condition</label>
+            <select id="yaraCondition"><option value="any">any of them</option><option value="all">all of them</option><option value="1">1 of them</option></select>
+          </div>
+        </div>
+        <div class="mo-field"><label>Description</label><input type="text" id="yaraDesc" placeholder="short description" /></div>
+        <div class="mo-field"><label>Strings (one per line, ASCII text)</label><textarea id="yaraStrings" placeholder="C:\Users\Public\update.dll&#10;POST /gate.php HTTP/1.1&#10;MyMutexName123"></textarea></div>
+        <div class="mo-btn-row"><button class="mo-btn mo-btn-primary" onclick="generateYara()">GENERATE RULE</button></div>
+        <div class="mo-code" id="yaraOutWrap" hidden>
+          <div class="mo-code-bar"><span class="lbl">rule.yar</span><div class="mo-btn-row"><button class="mo-btn" onclick="copyText('yaraOut')">COPY</button><button class="mo-btn" onclick="downloadText('yaraOut','rule.yar')">DOWNLOAD</button></div></div>
+          <pre id="yaraOut"></pre>
+        </div>
+      </div>
+
+      <div class="mo-panel-box">
+        <div class="mo-section-title">Sigma Rule Builder</div>
+        <div class="mo-row2">
+          <div class="mo-field"><label>Title</label><input type="text" id="sigTitle" placeholder="Suspicious Encoded PowerShell Execution" /></div>
+          <div class="mo-field"><label>Level</label>
+            <select id="sigLevel"><option>informational</option><option>low</option><option selected>medium</option><option>high</option><option>critical</option></select>
+          </div>
+        </div>
+        <div class="mo-row2">
+          <div class="mo-field"><label>Logsource product</label><input type="text" id="sigProduct" placeholder="windows" /></div>
+          <div class="mo-field"><label>Logsource category/service</label><input type="text" id="sigService" placeholder="process_creation" /></div>
+        </div>
+        <div class="mo-field"><label>Description</label><input type="text" id="sigDesc" placeholder="short description" /></div>
+        <div class="mo-field"><label>Detection selection (one field: value per line)</label><textarea id="sigFields" placeholder="Image|endswith: \powershell.exe&#10;CommandLine|contains: '-EncodedCommand'"></textarea></div>
+        <div class="mo-field"><label>Tags (comma separated)</label><input type="text" id="sigTags" placeholder="attack.execution, attack.t1059.001" /></div>
+        <div class="mo-btn-row"><button class="mo-btn mo-btn-primary" onclick="generateSigma()">GENERATE RULE</button></div>
+        <div class="mo-code" id="sigOutWrap" hidden>
+          <div class="mo-code-bar"><span class="lbl">rule.yml</span><div class="mo-btn-row"><button class="mo-btn" onclick="copyText('sigOut')">COPY</button><button class="mo-btn" onclick="downloadText('sigOut','rule.yml')">DOWNLOAD</button></div></div>
+          <pre id="sigOut"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATT&CK TAGGER -->
+    <div class="mo-wb-panel" id="panel-attck">
+      <div class="mo-panel-box">
+        <div class="mo-section-title">ATT&amp;CK Tagger</div>
+        <p class="mo-panel-note">Select every technique observed during this analysis. Export a Navigator layer to drop straight into <a href="https://mitre-attack.github.io/attack-navigator/" target="_blank" rel="noopener">ATT&amp;CK Navigator</a>.</p>
+        <div class="mo-attck-grid" id="attckGrid"></div>
+        <div class="mo-btn-row">
+          <button class="mo-btn mo-btn-primary" onclick="exportNavigatorLayer()">EXPORT NAVIGATOR LAYER</button>
+          <button class="mo-btn" onclick="clearAttck()">CLEAR SELECTION</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="mo-wb-panel" id="panel-report">
+      <div class="mo-panel-box">
+        <div class="mo-section-title">Report Generator</div>
+        <p class="mo-panel-note">Pulls in whatever is currently saved in the IOC Worksheet and ATT&amp;CK Tagger. Fill the rest in below.</p>
+        <div class="mo-row3">
+          <div class="mo-field"><label>Sample name</label><input type="text" id="rptName" placeholder="sample.exe" /></div>
+          <div class="mo-field"><label>Classification / family</label><input type="text" id="rptFamily" placeholder="e.g. likely Qakbot variant" /></div>
+          <div class="mo-field"><label>Confidence</label><select id="rptConf"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+        </div>
+        <div class="mo-row3">
+          <div class="mo-field"><label>MD5</label><input type="text" id="rptMd5" /></div>
+          <div class="mo-field"><label>SHA-1</label><input type="text" id="rptSha1" /></div>
+          <div class="mo-field"><label>SHA-256</label><input type="text" id="rptSha256" /></div>
+        </div>
+        <div class="mo-field"><label>Executive summary</label><textarea id="rptExec" placeholder="3-5 sentences, no jargon"></textarea></div>
+        <div class="mo-field"><label>Behavioral summary (kill-chain order)</label><textarea id="rptBehavior" placeholder="infection chain, persistence, C2, payload behavior"></textarea></div>
+        <div class="mo-field"><label>Detection artifacts (paste generated YARA/Sigma, or notes)</label><textarea id="rptDetections"></textarea></div>
+        <div class="mo-field"><label>Recommendations</label><textarea id="rptRecs" placeholder="block these domains, hunt for this registry key, etc."></textarea></div>
+        <div class="mo-btn-row"><button class="mo-btn mo-btn-primary" onclick="generateReport()">GENERATE REPORT</button></div>
+        <div class="mo-code" id="rptOutWrap" hidden>
+          <div class="mo-code-bar"><span class="lbl">report.md</span><div class="mo-btn-row"><button class="mo-btn" onclick="copyText('rptOut')">COPY</button><button class="mo-btn" onclick="downloadText('rptOut','malware-analysis-report.md')">DOWNLOAD</button></div></div>
+          <pre id="rptOut"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIVOTS -->
+    <div class="mo-wb-panel" id="panel-pivot">
+      <div class="mo-panel-box">
+        <div class="mo-section-title">Pivot to Other H3AD-SEC Tools</div>
+        <p class="mo-panel-note">IP and Domain deep-link and auto-fill in X-VERDIKT / DNSCOPE. Hash and URL open the tool for a manual paste.</p>
+        <div class="mo-row2">
+          <div class="mo-field"><label>Value</label><input type="text" id="pivotValue" placeholder="8.8.8.8 / evil.example.com / a1b2c3..." /></div>
+          <div class="mo-field"><label>Type</label>
+            <select id="pivotType"><option value="ip">IP address</option><option value="domain">Domain / hostname</option><option value="hash">File hash</option><option value="url">URL</option></select>
+          </div>
+        </div>
+        <div class="mo-btn-row">
+          <button class="mo-btn mo-btn-primary" onclick="pivotXverdikt()">OPEN IN X-VERDIKT</button>
+          <button class="mo-btn mo-btn-primary" onclick="pivotDnscope()">OPEN IN DNSCOPE</button>
+          <button class="mo-btn" onclick="copyPivotValue()">COPY VALUE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mo-inspector-backdrop" id="inspectorBackdrop" onclick="closeInspector()"></div>
+<aside class="mo-inspector" id="inspector" role="dialog" aria-label="Phase detail">
+  <div class="mo-inspector-head">
+    <button class="mo-inspector-close" onclick="closeInspector()" title="Close (Esc)" aria-label="Close">✕</button>
+  </div>
+  <div class="mo-inspector-scroll" id="inspectorScroll">
+    <div class="mo-inspector-inner" id="detailInner"></div>
+  </div>
+</aside>
+
+<div class="mo-toast" id="toast"></div>
+
+<footer class="tracer-footer">
+  <span class="footer-left">H3AD-SEC © 2026 &nbsp;|&nbsp; MAL-OPS</span>
+  <span class="footer-right">MALWARE ANALYSIS WORKBENCH</span>
+  <div class="footer-credit-row">
+    <a class="footer-credit-pill" href="https://www.linkedin.com/in/hrushikesh-badgujar/" target="_blank" rel="noopener" title="Connect on LinkedIn">
+      <span class="credit-tool"><span class="xv-pill-accent">MAL</span><span class="xv-pill-text">-OPS</span></span>
+      <span class="credit-by">created by</span>
+      <span class="credit-name">H3AD</span>
+    </a>
+  </div>
+</footer>
+
+<script>
+function toggleDrawer(){document.getElementById('navDrawer').classList.toggle('open');}
+function closeDrawer(){document.getElementById('navDrawer').classList.remove('open');}
+
+(function(){
+  var saved=localStorage.getItem('h3ad-theme');
+  if(saved==='light')document.body.classList.add('light');
+  var logo=document.getElementById('navLogo');
+  if(logo)logo.src=document.body.classList.contains('light')
+    ?'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-light.png'
+    :'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png';
+})();
+function toggleTheme(){
+  var isLight=document.body.classList.toggle('light');
+  localStorage.setItem('h3ad-theme',isLight?'light':'dark');
+  var logo=document.getElementById('navLogo');
+  if(logo)logo.src=isLight
+    ?'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-light.png'
+    :'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png';
+}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._toastT);window._toastT=setTimeout(function(){t.classList.remove('show');},1800);}
+function copyText(id){var el=document.getElementById(id);navigator.clipboard.writeText(el.textContent||el.value||'').then(function(){toast('Copied');});}
+function downloadText(id,filename){var el=document.getElementById(id);var blob=new Blob([el.textContent||el.value||''],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href);}
+
+/* ── PHASE DATA (Process Guide) ── */
+var PALETTE=['#00d4ff','#58a6ff','#a78bfa','#f59e0b','#ec4899','#14b8a6','#eab308','#6366f1','#22d3ee','#fb923c','#facc15','#3b82f6'];
+var PHASES=[
+{num:1,title:'Lab Setup',cat:'CORE',summary:'Isolated VMs, network simulation, and per-sample hygiene before anything gets executed.',items:[
+ 'Build isolated Windows analysis VM (FLARE-VM) with Defender/Updates disabled',
+ 'Build Linux analysis VM (REMnux) for network simulation',
+ 'Configure host-only network, route through INetSim/FakeNet-NG',
+ 'Take a clean snapshot of every VM immediately after setup',
+ 'Disable shared folders and clipboard sync between host and guest']},
+{num:2,title:'Intake & Triage',cat:'CORE',summary:'Decide how much time this sample deserves before investing in deep RE.',items:[
+ 'Hash the sample (MD5 / SHA-1 / SHA-256)',
+ 'Identify true file type, not by extension',
+ 'Check hash reputation (VirusTotal, MalwareBazaar, any.run)',
+ 'Run fuzzy hashing (ssdeep / TLSH) against known families',
+ 'Log the sample in a tracking sheet with source and date']},
+{num:3,title:'Static Analysis',cat:'CORE',summary:'Examine the file without executing it: headers, strings, packer, YARA.',items:[
+ 'Inspect PE headers/sections/imports (PEStudio, CFF Explorer)',
+ 'Check entropy and identify packer (DIE, PEiD)',
+ 'Run FLOSS for strings, including decoded stack strings',
+ 'Run YARA against public rule sets',
+ 'Draft a working YARA rule from findings']},
+{num:4,title:'Dynamic Analysis',cat:'CORE',summary:'Execute inside the isolated VM and observe behavior in real time.',items:[
+ 'Take a Regshot baseline before execution',
+ 'Start ProcMon, Process Hacker, Wireshark, FakeNet-NG before detonation',
+ 'Detonate with the correct handler, observe over a realistic window',
+ 'Diff Regshot post-execution, cross-reference with ProcMon',
+ 'Export the network capture and any recovered payloads']},
+{num:5,title:'Unpacking / Deobfuscation',cat:'CORE',summary:'Get past a packer so static analysis becomes meaningful again.',items:[
+ 'Identify the packer entry pattern (pushad/popad, VirtualAlloc calls)',
+ 'Breakpoint to catch the OEP in a debugger (x64dbg)',
+ 'Dump process memory at the OEP',
+ 'Rebuild the import table (Scylla)',
+ 'Re-run static analysis against the unpacked binary']},
+{num:6,title:'Reverse Engineering',cat:'CORE',summary:'Full logic understanding: config extraction, crypto, C2 protocol.',items:[
+ 'Disassemble/decompile in IDA Free or Ghidra',
+ 'Rename key functions as understanding builds',
+ 'Locate and decrypt the embedded config blob',
+ 'Confirm crypto algorithm and key handling',
+ 'Cross-reference RE findings with dynamic C2 evidence']},
+{num:7,title:'Memory Forensics',cat:'CORE',summary:'Volatility pass when a memory image is available.',items:[
+ 'Identify OS profile for Volatility 3',
+ 'Run pslist/pstree for process relationships',
+ 'Run malfind for injected/hidden code regions',
+ 'Run netscan for connections at capture time',
+ 'Correlate the memory timeline with ProcMon/Wireshark']},
+{num:8,title:'IOC Extraction & TI Correlation',cat:'CORE',summary:'Consolidate everything found and pivot through threat intel.',items:[
+ 'Consolidate hashes, network, host, and config IOCs',
+ 'Pivot IOCs through VT/urlscan/Shodan for shared infrastructure',
+ 'Attempt family/variant classification (YARA/ssdeep hits)',
+ 'Map behavior to MITRE ATT&CK techniques']},
+{num:9,title:'Detection Engineering Output',cat:'CORE',summary:'Turn the analysis into something a SOC can actually deploy.',items:[
+ 'Finalize and test the YARA rule against a benign sample set',
+ 'Write a network signature (Suricata/Snort/Zeek)',
+ 'Write a host-based Sigma rule for the persistence/behavior seen',
+ 'Document ATT&CK mapping alongside each rule']},
+{num:10,title:'Reporting',cat:'CORE',summary:'Let someone who did not do the work act on it alone.',items:[
+ 'Write the executive summary (3-5 sentences)',
+ 'Document classification and confidence level',
+ 'Build the IOC table in copy-pasteable format',
+ 'Build the ATT&CK mapping table with evidence',
+ 'Attach detection artifacts and recommendations']},
+{num:11,title:'Cleanup',cat:'CORE',summary:'Reset the lab and hand off anything urgent.',items:[
+ 'Revert every VM to its clean snapshot',
+ 'Securely store the sample and report, indexed by hash',
+ 'Hand off IOCs to IR/containment immediately if this was a real incident']},
+{num:12,title:'Mobile Malware Analysis',cat:'EXTENDED',summary:'APK-focused static/dynamic pass, native libraries handled as their own ELF sample.',items:[
+ 'Decompile the APK with jadx/apktool',
+ 'Review manifest permissions and exported components',
+ 'Check assets/ and res/raw/ for a second-stage DEX payload',
+ 'Hook suspect APIs with Frida during a dynamic run',
+ 'Run through MobSF for fast automated triage']},
+{num:13,title:'Ransomware-Specific Workflow',cat:'EXTENDED',summary:'Containment and decryption feasibility take priority over full attribution.',items:[
+ 'Contain: only decoy files/directories mounted before detonation',
+ 'Identify the family via ID Ransomware or the ransom note',
+ 'Locate the encryption routine and identify the algorithm',
+ 'Check for shadow copy/backup deletion commands',
+ 'Check for exfiltration before encryption in the network capture']},
+{num:14,title:'Anti-Analysis / Anti-VM Reference',cat:'EXTENDED',summary:'What evasion to expect and how to defeat it.',items:[
+ 'Check for VM artifact detection (registry, process, MAC OUI)',
+ 'Check for sandbox timing tricks (sleep, uptime checks)',
+ 'Check for debugger detection (IsDebuggerPresent, PEB flag)',
+ 'Check for analyst-tool process enumeration',
+ 'Document every evasion check found, in the report']},
+{num:15,title:'Fileless & LOLBin Analysis',cat:'EXTENDED',summary:'No binary written to disk changes what evidence you can even collect.',items:[
+ 'Capture the full command line, not just the process name',
+ 'Collect Sysmon ID 1 and PowerShell ScriptBlock Logging (4104)',
+ 'Decode layered obfuscation (base64/gzip/XOR) without executing it',
+ 'Check for in-memory/reflective loading via memory forensics',
+ 'Check registry Run keys and WMI event subscriptions for persistence']},
+{num:16,title:'Automated Sandbox Pipelines',cat:'EXTENDED',summary:'CAPE or a hosted sandbox for repeat/high-volume triage.',items:[
+ 'Route high-volume samples through CAPE or a hosted sandbox first',
+ 'Treat automated output as triage, not a final verdict',
+ 'Flag a clean/empty automated result on a suspicious sample as a finding',
+ 'Reserve manual RE for novel or high-priority samples']},
+{num:17,title:'Legal & Chain-of-Custody',cat:'EXTENDED',summary:'Matters the moment a sample comes from a real incident.',items:[
+ 'Work from a copy; preserve the original write-protected',
+ 'Log every person/system that touches the sample, with timestamps',
+ 'Check data handling agreements before uploading to public scanners',
+ 'Record tool versions and environment for reproducibility',
+ 'Confirm the authorization boundary before touching live C2 infrastructure']}
+];
+var checklistState=JSON.parse(localStorage.getItem('malops_checklist_v1')||'{}');
+function saveChecklist(){localStorage.setItem('malops_checklist_v1',JSON.stringify(checklistState));}
+function checkKey(phaseNum,idx){return 'p'+phaseNum+'_'+idx;}
+function phaseProgress(p){var done=0;p.items.forEach(function(it,i){if(checklistState[checkKey(p.num,i)])done++;});return {done:done,total:p.items.length};}
+function overallProgress(){var done=0,total=0;PHASES.forEach(function(p){var pr=phaseProgress(p);done+=pr.done;total+=pr.total;});return {done:done,total:total};}
+function renderProgress(){var o=overallProgress();document.getElementById('progressLabel').textContent=o.done+' / '+o.total+' STEPS';document.getElementById('progressFill').style.width=(o.total?(o.done/o.total*100):0)+'%';}
+function resetChecklist(){if(!confirm('Reset all checklist progress?'))return;checklistState={};saveChecklist();renderCards();renderProgress();if(activePhase)openInspector(activePhase);}
+
+var activePhase=null;
+function renderCards(){
+  var grid=document.getElementById('cardGrid');
+  grid.innerHTML='';
+  PHASES.forEach(function(p,i){
+    var color=PALETTE[i%PALETTE.length];
+    var pr=phaseProgress(p);
+    var card=document.createElement('button');
+    card.className='mo-card';card.style.setProperty('--row-color',color);
+    card.onclick=function(){openInspector(p);};
+    card.innerHTML='<div class="mo-card-top"><span class="mo-card-num">PHASE '+p.num+'</span></div>'+
+      '<div class="mo-card-name">'+p.title+'</div>'+
+      '<div class="mo-card-desc">'+p.summary+'</div>'+
+      '<div class="mo-card-foot"><span class="mo-cat-pill" style="background:color-mix(in srgb,'+color+' 20%,transparent);color:'+color+';border:1px solid color-mix(in srgb,'+color+' 40%,transparent);">'+p.cat+'</span>'+
+      '<span class="mo-card-progress">'+pr.done+'/'+pr.total+'</span></div>';
+    grid.appendChild(card);
+  });
+  renderProgress();
+}
+function openInspector(p){
+  activePhase=p;
+  var idx=PHASES.indexOf(p);var color=PALETTE[idx%PALETTE.length];
+  var pr=phaseProgress(p);
+  var html='<div class="mo-d-eyebrow" style="color:'+color+'">PHASE '+p.num+' &middot; '+p.cat+'</div>'+
+    '<div class="mo-d-title">'+p.title+'</div>'+
+    '<div class="mo-d-desc">'+p.summary+'</div>'+
+    '<div class="mo-section-title" style="border-color:'+color+';color:'+color+'">Checklist ('+pr.done+'/'+pr.total+')</div>'+
+    '<div class="mo-checklist">';
+  p.items.forEach(function(it,i){
+    var key=checkKey(p.num,i);var checked=!!checklistState[key];
+    html+='<label class="mo-check-item'+(checked?' done':'')+'"><input type="checkbox" '+(checked?'checked':'')+' onchange="toggleCheck(\''+p.num+'\','+i+',this)"><span>'+it+'</span></label>';
+  });
+  html+='</div>';
+  document.getElementById('detailInner').innerHTML=html;
+  document.getElementById('inspector').classList.add('open');
+  document.getElementById('inspectorBackdrop').classList.add('open');
+}
+function toggleCheck(phaseNum,idx,el){
+  var key=checkKey(phaseNum,idx);
+  checklistState[key]=el.checked;
+  saveChecklist();
+  el.closest('.mo-check-item').classList.toggle('done',el.checked);
+  renderProgress();
+  renderCards();
+}
+function closeInspector(){document.getElementById('inspector').classList.remove('open');document.getElementById('inspectorBackdrop').classList.remove('open');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeInspector();});
+
+function setView(v){
+  document.getElementById('viewBtnGuide').classList.toggle('active',v==='guide');
+  document.getElementById('viewBtnWb').classList.toggle('active',v==='workbench');
+  document.getElementById('viewBtnGuide').setAttribute('aria-selected',v==='guide');
+  document.getElementById('viewBtnWb').setAttribute('aria-selected',v==='workbench');
+  document.getElementById('guideView').hidden=v!=='guide';
+  document.getElementById('guideIntro').hidden=v!=='guide';
+  document.getElementById('wbView').hidden=v!=='workbench';
+  document.getElementById('progressWrap').style.display=v==='guide'?'flex':'none';
+}
+function setWbTab(name){
+  document.querySelectorAll('.mo-wb-tab').forEach(function(b){b.classList.toggle('active',b.dataset.panel===name);});
+  document.querySelectorAll('.mo-wb-panel').forEach(function(p){p.classList.toggle('active',p.id==='panel-'+name);});
+}
+
+/* ── IOC WORKSHEET ── */
+var IOC_TYPES=['MD5','SHA-1','SHA-256','Domain','IP Address','URL','Registry Key','File Path','Mutex','User-Agent'];
+var iocs=JSON.parse(localStorage.getItem('malops_iocs_v1')||'[]');
+function saveIocs(){localStorage.setItem('malops_iocs_v1',JSON.stringify(iocs));}
+function renderIocs(){
+  var tbody=document.getElementById('iocRows');tbody.innerHTML='';
+  iocs.forEach(function(row,i){
+    var tr=document.createElement('tr');
+    var typeOpts=IOC_TYPES.map(function(t){return '<option'+(t===row.type?' selected':'')+'>'+t+'</option>';}).join('');
+    tr.innerHTML='<td><select onchange="updateIoc('+i+',\'type\',this.value)">'+typeOpts+'</select></td>'+
+      '<td><input type="text" value="'+escAttr(row.value)+'" oninput="updateIoc('+i+',\'value\',this.value)" placeholder="value"></td>'+
+      '<td><input type="text" value="'+escAttr(row.notes)+'" oninput="updateIoc('+i+',\'notes\',this.value)" placeholder="notes"></td>'+
+      '<td><button class="mo-icon-btn" onclick="deleteIoc('+i+')" title="Delete row" aria-label="Delete row">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+function escAttr(s){return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function addIocRow(){iocs.push({type:'SHA-256',value:'',notes:''});saveIocs();renderIocs();}
+function updateIoc(i,field,val){iocs[i][field]=val;saveIocs();}
+function deleteIoc(i){iocs.splice(i,1);saveIocs();renderIocs();}
+function clearIocs(){if(!confirm('Clear all IOC rows?'))return;iocs=[];saveIocs();renderIocs();}
+function exportIocsCsv(){
+  var lines=['Type,Value,Notes'];
+  iocs.forEach(function(r){lines.push([r.type,r.value,r.notes].map(function(v){return '"'+(v||'').replace(/"/g,'""')+'"';}).join(','));});
+  var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mal-ops-iocs.csv';a.click();URL.revokeObjectURL(a.href);
+}
+function stixPatternFor(type,value){
+  var v=(value||'').replace(/'/g,"\\'");
+  switch(type){
+    case 'MD5': return "[file:hashes.MD5 = '"+v+"']";
+    case 'SHA-1': return "[file:hashes.'SHA-1' = '"+v+"']";
+    case 'SHA-256': return "[file:hashes.'SHA-256' = '"+v+"']";
+    case 'Domain': return "[domain-name:value = '"+v+"']";
+    case 'IP Address': return "[ipv4-addr:value = '"+v+"']";
+    case 'URL': return "[url:value = '"+v+"']";
+    case 'Mutex': return "[mutex:name = '"+v+"']";
+    default: return "[x-mal-ops:value = '"+v+"']";
+  }
+}
+function exportIocsStix(){
+  var now=new Date().toISOString();
+  var objects=[{type:'identity',spec_version:'2.1',id:'identity--mal-ops-analyst',name:'MAL-OPS Analyst',identity_class:'individual',created:now,modified:now}];
+  iocs.forEach(function(r,i){
+    if(!r.value)return;
+    objects.push({type:'indicator',spec_version:'2.1',id:'indicator--'+cryptoRandomId(i),created:now,modified:now,
+      name:(r.type+': '+r.value),description:r.notes||'',pattern:stixPatternFor(r.type,r.value),pattern_type:'stix',valid_from:now});
+  });
+  var bundle={type:'bundle',id:'bundle--'+cryptoRandomId('b'),objects:objects};
+  var blob=new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mal-ops-iocs.stix2.json';a.click();URL.revokeObjectURL(a.href);
+}
+function cryptoRandomId(seed){
+  if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});
+}
+
+/* ── CHEAT SHEET ── */
+var CHEATS=[
+{group:'Triage',items:[
+ {label:'Hash a file (Windows)',cmd:'certutil -hashfile sample.exe SHA256'},
+ {label:'Hash a file (Linux)',cmd:'sha256sum sample.bin'},
+ {label:'Identify file type',cmd:'file sample.bin'},
+ {label:'Fuzzy hash',cmd:'ssdeep sample.exe'}]},
+{group:'Static Analysis',items:[
+ {label:'Obfuscation-aware strings',cmd:'floss sample.exe'},
+ {label:'Scan with a YARA rule set',cmd:'yara -r rules.yar sample.exe'},
+ {label:'Extract VBA macros',cmd:'olevba sample.docm'},
+ {label:'PDF quick triage',cmd:'pdfid sample.pdf'}]},
+{group:'Dynamic Analysis',items:[
+ {label:'ProcMon filter: this process only',cmd:'Process Name is sample.exe'},
+ {label:'Wireshark filter: VM traffic only',cmd:'ip.addr==10.0.0.5 && !mdns'},
+ {label:'Regshot workflow',cmd:'1st shot -> run sample -> 2nd shot -> Compare'}]},
+{group:'Unpacking',items:[
+ {label:'x64dbg: break on allocation',cmd:'bp VirtualAlloc'},
+ {label:'Scylla: dump + fix imports',cmd:'Attach -> IAT Autosearch -> Get Imports -> Fix Dump'}]},
+{group:'Memory Forensics (Volatility 3)',items:[
+ {label:'Identify OS profile',cmd:'vol.py -f mem.dmp windows.info'},
+ {label:'Process tree',cmd:'vol.py -f mem.dmp windows.pstree'},
+ {label:'Injected/hidden code',cmd:'vol.py -f mem.dmp windows.malfind'},
+ {label:'Network connections at capture time',cmd:'vol.py -f mem.dmp windows.netscan'}]},
+{group:'Detection Engineering',items:[
+ {label:'Test YARA rule against a benign corpus',cmd:'yara -r rule.yar -f benign_corpus/'},
+ {label:'Convert Sigma rule to a SIEM query',cmd:'sigma convert -t splunk rule.yml'}]}
+];
+function renderCheatSheet(){
+  var out=document.getElementById('cheatSheetOut');out.innerHTML='';
+  CHEATS.forEach(function(g,gi){
+    var div=document.createElement('div');div.className='mo-cheat-group';
+    var h='<div class="mo-section-title">'+g.group+'</div>';
+    g.items.forEach(function(it,ii){
+      var id='cheat_'+gi+'_'+ii;
+      h+='<div><div class="mo-cheat-label">'+it.label+'</div><div class="mo-cheat-cmd"><code id="'+id+'">'+it.cmd.replace(/</g,'&lt;')+'</code><button class="mo-btn" onclick="copyCheat(\''+id+'\')">COPY</button></div></div>';
+    });
+    div.innerHTML=h;out.appendChild(div);
+  });
+}
+function copyCheat(id){var el=document.getElementById(id);navigator.clipboard.writeText(el.textContent).then(function(){toast('Copied');});}
+
+/* ── RULE BUILDER ── */
+function generateYara(){
+  var name=(document.getElementById('yaraName').value||'Unnamed_Rule').replace(/[^A-Za-z0-9_]/g,'_');
+  var author=document.getElementById('yaraAuthor').value||'analyst';
+  var desc=document.getElementById('yaraDesc').value||'Generated by MAL-OPS';
+  var cond=document.getElementById('yaraCondition').value;
+  var lines=(document.getElementById('yaraStrings').value||'').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  var condText=cond==='all'?'all of them':(cond==='1'?'1 of them':'any of them');
+  var out='rule '+name+'\n{\n    meta:\n        author = "'+author+'"\n        description = "'+desc.replace(/"/g,'\\"')+'"\n        date = "'+new Date().toISOString().slice(0,10)+'"\n\n    strings:\n';
+  if(lines.length===0){out+='        $s1 = "PLACEHOLDER"\n';}
+  else{lines.forEach(function(l,i){out+='        $s'+(i+1)+' = "'+l.replace(/"/g,'\\"')+'"\n';});}
+  out+='\n    condition:\n        '+condText+'\n}';
+  document.getElementById('yaraOut').textContent=out;
+  document.getElementById('yaraOutWrap').hidden=false;
+  localStorage.setItem('malops_last_yara',out);
+}
+function generateSigma(){
+  var title=document.getElementById('sigTitle').value||'Untitled Rule';
+  var level=document.getElementById('sigLevel').value;
+  var product=document.getElementById('sigProduct').value||'windows';
+  var service=document.getElementById('sigService').value||'process_creation';
+  var desc=document.getElementById('sigDesc').value||'Generated by MAL-OPS';
+  var fields=(document.getElementById('sigFields').value||'').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  var tags=(document.getElementById('sigTags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean);
+  var id=cryptoRandomId('sigma');
+  var out='title: '+title+'\nid: '+id+'\nstatus: experimental\ndescription: '+desc+'\nreferences:\n    - internal://mal-ops\nauthor: MAL-OPS\ndate: '+new Date().toISOString().slice(0,10).replace(/-/g,'/')+'\nlogsource:\n    product: '+product+'\n    category: '+service+'\ndetection:\n    selection:\n';
+  if(fields.length===0){out+='        FieldName: PLACEHOLDER\n';}
+  else{fields.forEach(function(f){out+='        '+f+'\n';});}
+  out+='    condition: selection\nfalsepositives:\n    - Unknown\nlevel: '+level+'\n';
+  if(tags.length){out+='tags:\n';tags.forEach(function(t){out+='    - '+t+'\n';});}
+  document.getElementById('sigOut').textContent=out;
+  document.getElementById('sigOutWrap').hidden=false;
+  localStorage.setItem('malops_last_sigma',out);
+}
+
+/* ── ATT&CK TAGGER ── */
+var ATTCK=[
+{id:'T1027',name:'Obfuscated Files or Information',tactic:'Defense Evasion'},
+{id:'T1140',name:'Deobfuscate/Decode Files or Information',tactic:'Defense Evasion'},
+{id:'T1055',name:'Process Injection',tactic:'Defense Evasion'},
+{id:'T1497',name:'Virtualization/Sandbox Evasion',tactic:'Defense Evasion'},
+{id:'T1497.001',name:'System Checks',tactic:'Defense Evasion'},
+{id:'T1497.003',name:'Time Based Evasion',tactic:'Defense Evasion'},
+{id:'T1622',name:'Debugger Evasion',tactic:'Defense Evasion'},
+{id:'T1112',name:'Modify Registry',tactic:'Defense Evasion'},
+{id:'T1218',name:'System Binary Proxy Execution',tactic:'Defense Evasion'},
+{id:'T1218.005',name:'Mshta',tactic:'Defense Evasion'},
+{id:'T1218.011',name:'Rundll32',tactic:'Defense Evasion'},
+{id:'T1202',name:'Indirect Command Execution',tactic:'Defense Evasion'},
+{id:'T1547.001',name:'Registry Run Keys / Startup Folder',tactic:'Persistence'},
+{id:'T1053.005',name:'Scheduled Task',tactic:'Persistence'},
+{id:'T1543.003',name:'Windows Service',tactic:'Persistence'},
+{id:'T1546.003',name:'WMI Event Subscription',tactic:'Persistence'},
+{id:'T1071.001',name:'Web Protocols',tactic:'Command and Control'},
+{id:'T1071.004',name:'DNS',tactic:'Command and Control'},
+{id:'T1105',name:'Ingress Tool Transfer',tactic:'Command and Control'},
+{id:'T1486',name:'Data Encrypted for Impact',tactic:'Impact'},
+{id:'T1490',name:'Inhibit System Recovery',tactic:'Impact'},
+{id:'T1082',name:'System Information Discovery',tactic:'Discovery'},
+{id:'T1057',name:'Process Discovery',tactic:'Discovery'},
+{id:'T1012',name:'Query Registry',tactic:'Discovery'},
+{id:'T1016',name:'System Network Configuration Discovery',tactic:'Discovery'},
+{id:'T1033',name:'System Owner/User Discovery',tactic:'Discovery'},
+{id:'T1518.001',name:'Security Software Discovery',tactic:'Discovery'},
+{id:'T1059.001',name:'PowerShell',tactic:'Execution'},
+{id:'T1059.005',name:'Visual Basic',tactic:'Execution'},
+{id:'T1204.002',name:'Malicious File',tactic:'Execution'},
+{id:'T1041',name:'Exfiltration Over C2 Channel',tactic:'Exfiltration'},
+{id:'T1560',name:'Archive Collected Data',tactic:'Collection'},
+{id:'T1005',name:'Data from Local System',tactic:'Collection'}
+];
+var attckState=JSON.parse(localStorage.getItem('malops_attck_v1')||'{}');
+function saveAttck(){localStorage.setItem('malops_attck_v1',JSON.stringify(attckState));}
+function renderAttck(){
+  var grid=document.getElementById('attckGrid');grid.innerHTML='';
+  ATTCK.forEach(function(t){
+    var checked=!!attckState[t.id];
+    var label=document.createElement('label');label.className='mo-attck-item';
+    label.innerHTML='<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleAttck(\''+t.id+'\',this.checked)">'+
+      '<div><div class="id">'+t.id+'</div><div class="nm">'+t.name+'</div><div class="tac">'+t.tactic+'</div></div>';
+    grid.appendChild(label);
+  });
+}
+function toggleAttck(id,checked){if(checked)attckState[id]=true;else delete attckState[id];saveAttck();}
+function clearAttck(){if(!confirm('Clear ATT&CK selection?'))return;attckState={};saveAttck();renderAttck();}
+function exportNavigatorLayer(){
+  var selected=Object.keys(attckState);
+  if(selected.length===0){toast('No techniques selected');return;}
+  var layer={name:'MAL-OPS Analysis',versions:{attack:'15',navigator:'4.9.1',layer:'4.5'},domain:'enterprise-attack',
+    description:'Generated by MAL-OPS workbench',
+    techniques:selected.map(function(id){return {techniqueID:id,color:'#00d4ff',comment:'',enabled:true,score:1};}),
+    gradient:{colors:['#ffffff','#00d4ff'],minValue:0,maxValue:1},legendItems:[],showTacticRowBackground:false,tacticRowBackground:'#dddddd',selectTechniquesAcrossTactics:true,selectSubtechniquesWithParent:false};
+  var blob=new Blob([JSON.stringify(layer,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mal-ops-navigator-layer.json';a.click();URL.revokeObjectURL(a.href);
+}
+
+/* ── REPORT GENERATOR ── */
+function generateReport(){
+  var name=document.getElementById('rptName').value||'(unnamed sample)';
+  var family=document.getElementById('rptFamily').value||'unclassified';
+  var conf=document.getElementById('rptConf').value;
+  var md5=document.getElementById('rptMd5').value||'-';
+  var sha1=document.getElementById('rptSha1').value||'-';
+  var sha256=document.getElementById('rptSha256').value||'-';
+  var exec=document.getElementById('rptExec').value||'-';
+  var behavior=document.getElementById('rptBehavior').value||'-';
+  var detections=document.getElementById('rptDetections').value||'(none captured)';
+  var recs=document.getElementById('rptRecs').value||'-';
+
+  var iocTable='| Type | Value | Notes |\n|---|---|---|\n';
+  if(iocs.length===0)iocTable+='| - | - | - |\n';
+  else iocs.forEach(function(r){iocTable+='| '+(r.type||'-')+' | '+(r.value||'-')+' | '+(r.notes||'-')+' |\n';});
+
+  var attckSelected=Object.keys(attckState);
+  var attckTable='| Technique ID | Name | Tactic |\n|---|---|---|\n';
+  if(attckSelected.length===0)attckTable+='| - | - | - |\n';
+  else attckSelected.forEach(function(id){var t=ATTCK.find(function(x){return x.id===id;});if(t)attckTable+='| '+t.id+' | '+t.name+' | '+t.tactic+' |\n';});
+
+  var md='# Malware Analysis Report: '+name+'\n\n'+
+'## Executive Summary\n\n'+exec+'\n\n'+
+'## Classification\n\nFamily/type: **'+family+'** &middot; Confidence: **'+conf+'**\n\n'+
+'## Hashes\n\n| Type | Value |\n|---|---|\n| MD5 | '+md5+' |\n| SHA-1 | '+sha1+' |\n| SHA-256 | '+sha256+' |\n\n'+
+'## Behavioral Summary\n\n'+behavior+'\n\n'+
+'## IOCs\n\n'+iocTable+'\n'+
+'## ATT&CK Mapping\n\n'+attckTable+'\n'+
+'## Detection Artifacts\n\n```\n'+detections+'\n```\n\n'+
+'## Recommendations\n\n'+recs+'\n\n'+
+'---\n*Generated with the MAL-OPS workbench: https://h3ad-sec.github.io/MAL-OPS/*\n';
+
+  document.getElementById('rptOut').textContent=md;
+  document.getElementById('rptOutWrap').hidden=false;
+}
+
+/* ── PIVOTS ── */
+function pivotXverdikt(){
+  var v=document.getElementById('pivotValue').value.trim();var t=document.getElementById('pivotType').value;
+  if(!v){toast('Enter a value first');return;}
+  var url='https://h3ad-sec.github.io/X-VERDIKT/'+(t==='ip'?('?ip='+encodeURIComponent(v)):'');
+  window.open(url,'_blank','noopener');
+}
+function pivotDnscope(){
+  var v=document.getElementById('pivotValue').value.trim();var t=document.getElementById('pivotType').value;
+  if(!v){toast('Enter a value first');return;}
+  var url='https://h3ad-sec.github.io/DNSCOPE/'+(t==='domain'?('?q='+encodeURIComponent(v)):'');
+  window.open(url,'_blank','noopener');
+}
+function copyPivotValue(){var v=document.getElementById('pivotValue').value;if(!v){toast('Nothing to copy');return;}navigator.clipboard.writeText(v).then(function(){toast('Copied');});}
+
+/* ── INIT ── */
+renderCards();
+renderIocs();
+renderCheatSheet();
+renderAttck();
+if(iocs.length===0){addIocRow();}
+</script>
+</body>
+</html>
